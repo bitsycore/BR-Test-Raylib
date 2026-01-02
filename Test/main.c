@@ -253,7 +253,7 @@ int BF_Main(void) {
 
 	// ==================================
 	// Raylib Initialization
-	SetTraceLogLevel(100);
+	SetTraceLogLevel(0);
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
 	InitWindow(1024, 768, "Clay - Raylib Renderer Example");
 

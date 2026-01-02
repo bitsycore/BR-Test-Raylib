@@ -17,3 +17,11 @@ target_link_libraries(Test
 		BFramework
 		raylib
 )
+
+set(RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources")
+
+add_custom_command(TARGET Test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${RESOURCE_DIR}"
+        "$<TARGET_FILE_DIR:Test>/resources"
+)
