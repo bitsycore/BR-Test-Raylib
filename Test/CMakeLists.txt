@@ -7,9 +7,20 @@ endif ()
 
 add_executable(Test
 		main.c
-		clayray.c
-		clay.h
-		clayray.h
+		3rdparty/clayray.c
+		3rdparty/clay.h
+		3rdparty/clayray.h
+		constants/Colors.h
+		components/Scrollbar.c
+		components/Scrollbar.h
+		components/Blob4Floating2.c
+		components/Blob4Floating2.h
+		components/Sidebar.c
+		components/Sidebar.h
+		ResourcesLoad.c
+		ResourcesLoad.h
+		components/RightPanel.c
+		components/RightPanel.h
 )
 
 target_link_libraries(Test

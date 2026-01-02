@@ -1,0 +1,7 @@
+#ifndef BR_TEST_RAYLIB_COLORS_H
+#define BR_TEST_RAYLIB_COLORS_H
+
+#define COLOR_ORANGE (Clay_Color) {225, 138, 50, 255}
+#define COLOR_BLUE (Clay_Color) {111, 173, 162, 255}
+
+#endif //BR_TEST_RAYLIB_COLORS_H

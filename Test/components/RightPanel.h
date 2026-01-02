@@ -1,0 +1,6 @@
+#ifndef BR_TEST_RAYLIB_RIGHTPANEL_H
+#define BR_TEST_RAYLIB_RIGHTPANEL_H
+
+void RightPanelRender(void);
+
+#endif //BR_TEST_RAYLIB_RIGHTPANEL_H
