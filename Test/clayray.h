@@ -27,9 +27,8 @@ typedef struct CustomLayoutElement {
 #define CLAY_RECTANGLE_TO_RAY(rectangle) (Rectangle) { .x = rectangle.x, .y = rectangle.y, .width = rectangle.width, .height = rectangle.height }
 #define CLAY_COLOR_TO_RAY(color) (Color) { .r = (unsigned char)roundf(color.r), .g = (unsigned char)roundf(color.g), .b = (unsigned char)roundf(color.b), .a = (unsigned char)roundf(color.a) }
 
-void ClayRay_Initialize(int width, int height, const char *title, unsigned int flags);
 void ClayRay_Render(Clay_RenderCommandArray renderCommands, const Font* fonts);
-void ClayRay_Close();
+void ClayRay_Cleanup();
 
 Clay_Dimensions ClayRay_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData);
 

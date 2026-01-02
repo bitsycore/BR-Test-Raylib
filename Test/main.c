@@ -3,21 +3,46 @@
 
 #define CLAY_IMPLEMENTATION
 #include "clay.h"
-
+#include "clayray.h"
 #include "raylib.h"
 
-#include "clayray.h"
 #include "BCore/Memory/BC_Memory.h"
 
-const uint32_t FONT_ID_BODY_24 = 0;
-const uint32_t FONT_ID_BODY_16 = 1;
+static const uint32_t FONT_ID_BODY_24 = 0;
+static const uint32_t FONT_ID_BODY_16 = 1;
+static Texture2D gProfilePicture;
+
 #define COLOR_ORANGE (Clay_Color) {225, 138, 50, 255}
 #define COLOR_BLUE (Clay_Color) {111, 173, 162, 255}
 
-Texture2D profilePicture;
+static Clay_String gProfileText = CLAY_STRING_CONST("Profile Page one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen");
+static Clay_TextElementConfig gHeaderTextConfig = {.fontId = 1, .letterSpacing = 5, .fontSize = 16, .textColor = {0, 0, 0, 255}};
+static Clay_LayoutConfig gDropdownTextItemLayout = {.padding = {8, 8, 4, 4}};
+static Clay_TextElementConfig gDropdownTextElementConfig = {.fontSize = 24, .textColor = {255, 255, 255, 255}};
+static Font gFonts[2];
 
-Clay_String profileText = CLAY_STRING_CONST("Profile Page one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen");
-Clay_TextElementConfig headerTextConfig = {.fontId = 1, .letterSpacing = 5, .fontSize = 16, .textColor = {0, 0, 0, 255}};
+typedef struct ScrollbarData {
+	Clay_Vector2 clickOrigin;
+	Clay_Vector2 positionOrigin;
+	bool mouseDown;
+} ScrollbarData;
+
+static ScrollbarData gScrollbarData = {0};
+
+static bool gDebugEnabled = false;
+static bool gReinitializeClay = false;
+
+void HandleClayErrors(const Clay_ErrorData errorData) {
+	printf("%s", errorData.errorText.chars);
+	if (errorData.errorType == CLAY_ERROR_TYPE_ELEMENTS_CAPACITY_EXCEEDED) {
+		gReinitializeClay = true;
+		Clay_SetMaxElementCount(Clay_GetMaxElementCount() * 2);
+	}
+	else if (errorData.errorType == CLAY_ERROR_TYPE_TEXT_MEASUREMENT_CAPACITY_EXCEEDED) {
+		gReinitializeClay = true;
+		Clay_SetMaxMeasureTextCacheWordCount(Clay_GetMaxMeasureTextCacheWordCount() * 2);
+	}
+}
 
 void HandleHeaderButtonInteraction(Clay_ElementId elementId, const Clay_PointerData pointerData, intptr_t userData) {
 	if (pointerData.state == CLAY_POINTER_DATA_PRESSED_THIS_FRAME) {
@@ -32,19 +57,15 @@ Clay_ElementDeclaration HeaderButtonStyle(const bool hovered) {
 	};
 }
 
-// Examples of re-usable "Components"
 void RenderHeaderButton(const Clay_String text) {
 	CLAY_AUTO_ID(HeaderButtonStyle(Clay_Hovered())) {
-		CLAY_TEXT(text, CLAY_TEXT_CONFIG(headerTextConfig));
+		CLAY_TEXT(text, CLAY_TEXT_CONFIG(gHeaderTextConfig));
 	}
 }
 
-Clay_LayoutConfig dropdownTextItemLayout = {.padding = {8, 8, 4, 4}};
-Clay_TextElementConfig dropdownTextElementConfig = {.fontSize = 24, .textColor = {255, 255, 255, 255}};
-
 void RenderDropdownTextItem(int index) {
-	CLAY_AUTO_ID({ .layout = dropdownTextItemLayout, .backgroundColor = {180, 180, 180, 255} }) {
-		CLAY_TEXT(CLAY_STRING("I'm a text field in a scroll container."), &dropdownTextElementConfig);
+	CLAY_AUTO_ID({ .layout = gDropdownTextItemLayout, .backgroundColor = {180, 180, 180, 255} }) {
+		CLAY_TEXT(CLAY_STRING("I'm a text field in a scroll container."), &gDropdownTextElementConfig);
 	}
 }
 
@@ -57,8 +78,8 @@ Clay_RenderCommandArray CreateLayout(void) {
 			CLAY(CLAY_ID("ProfilePictureOuter"), { .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .padding = { 8, 8, 8, 8 }, .childGap = 8,
 				 .childAlignment = { .y = CLAY_ALIGN_Y_CENTER } }, .backgroundColor = {130, 130, 255, 255} }) {
 				CLAY(CLAY_ID("ProfilePicture"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(60), .height = CLAY_SIZING_FIXED(60) } },
-					 .image = { .imageData = &profilePicture }}) {}
-				CLAY_TEXT(profileText, CLAY_TEXT_CONFIG({ .fontSize = 24, .textColor = {0, 0, 0, 255}, .textAlignment = CLAY_TEXT_ALIGN_RIGHT }));
+					 .image = { .imageData = &gProfilePicture }}) {}
+				CLAY_TEXT(gProfileText, CLAY_TEXT_CONFIG({ .fontSize = 24, .textColor = {0, 0, 0, 255}, .textAlignment = CLAY_TEXT_ALIGN_RIGHT }));
 			}
 			CLAY(CLAY_ID("SidebarBlob1"), { .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }}, .backgroundColor = {110, 110, 255, 255} }) {}
 			CLAY(CLAY_ID("SidebarBlob2"), { .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) }}, .backgroundColor = {110, 110, 255, 255} }) {}
@@ -94,11 +115,11 @@ Clay_RenderCommandArray CreateLayout(void) {
 
 				CLAY(CLAY_ID("Photos2"), { .layout = { .childGap = 16, .padding = { 16, 16, 16, 16 }}, .backgroundColor = {180, 180, 220, Clay_Hovered() ? 120 : 255} }) {
 					CLAY(CLAY_ID("Picture4"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(120), .height = CLAY_SIZING_FIXED(120) }},
-						 .image = { .imageData = &profilePicture }}) {}
+						 .image = { .imageData = &gProfilePicture }}) {}
 					CLAY(CLAY_ID("Picture5"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(120), .height = CLAY_SIZING_FIXED(120) }},
-						 .image = { .imageData = &profilePicture }}) {}
+						 .image = { .imageData = &gProfilePicture }}) {}
 					CLAY(CLAY_ID("Picture6"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(120), .height = CLAY_SIZING_FIXED(120) }},
-						 .image = { .imageData = &profilePicture }}) {}
+						 .image = { .imageData = &gProfilePicture }}) {}
 				}
 
 				CLAY_TEXT(
@@ -115,14 +136,14 @@ Clay_RenderCommandArray CreateLayout(void) {
 
 				CLAY(CLAY_ID("Photos"), { .layout = { .sizing = { .width = CLAY_SIZING_GROW(0) }, .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
 					 .childGap = 16, .padding = {16, 16, 16, 16} }, .backgroundColor = {180, 180, 220, 255} }) {
-					CLAY(CLAY_ID("Picture2"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(120) }}, .aspectRatio = 1, .image = { .imageData = &profilePicture }}) {}
+					CLAY(CLAY_ID("Picture2"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(120) }}, .aspectRatio = 1, .image = { .imageData = &gProfilePicture }}) {}
 					CLAY(CLAY_ID("Picture1"), { .layout = { .childAlignment = { .x = CLAY_ALIGN_X_CENTER }, .layoutDirection = CLAY_TOP_TO_BOTTOM, .padding = {8, 8, 8, 8} },
 						 .backgroundColor = {170, 170, 220, 255} }) {
 						CLAY(CLAY_ID("ProfilePicture2"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(60), .height = CLAY_SIZING_FIXED(60) }},
-							 .image = { .imageData = &profilePicture }}) {}
+							 .image = { .imageData = &gProfilePicture }}) {}
 						CLAY_TEXT(CLAY_STRING("Image caption below"), CLAY_TEXT_CONFIG({ .fontSize = 24, .textColor = {0,0,0,255} }));
 					}
-					CLAY(CLAY_ID("Picture3"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(120) }}, .aspectRatio = 1, .image = { .imageData = &profilePicture }}) {}
+					CLAY(CLAY_ID("Picture3"), { .layout = { .sizing = { .width = CLAY_SIZING_FIXED(120) }}, .aspectRatio = 1, .image = { .imageData = &gProfilePicture }}) {}
 				}
 
 				CLAY_TEXT(
@@ -173,41 +194,31 @@ Clay_RenderCommandArray CreateLayout(void) {
 	return Clay_EndLayout();
 }
 
-typedef struct {
-	Clay_Vector2 clickOrigin;
-	Clay_Vector2 positionOrigin;
-	bool mouseDown;
-} ScrollbarData;
-
-ScrollbarData scrollbarData = {0};
-
-bool debugEnabled = false;
-
-void UpdateDrawFrame(Font* fonts) {
+void UpdateDrawFrame(const Font* fonts) {
 	const Vector2 mouseWheelDelta = GetMouseWheelMoveV();
 	const float mouseWheelX = mouseWheelDelta.x;
 	const float mouseWheelY = mouseWheelDelta.y;
 
 	if (IsKeyPressed(KEY_D)) {
-		debugEnabled = !debugEnabled;
-		Clay_SetDebugModeEnabled(debugEnabled);
+		gDebugEnabled = !gDebugEnabled;
+		Clay_SetDebugModeEnabled(gDebugEnabled);
 	}
 	//----------------------------------------------------------------------------------
 	// Handle scroll containers
 	const Clay_Vector2 mousePosition = RAY_VECTOR2_TO_CLAY(GetMousePosition());
-	Clay_SetPointerState(mousePosition, IsMouseButtonDown(0) && !scrollbarData.mouseDown);
+	Clay_SetPointerState(mousePosition, IsMouseButtonDown(0) && !gScrollbarData.mouseDown);
 	Clay_SetLayoutDimensions((Clay_Dimensions){(float)GetScreenWidth(), (float)GetScreenHeight()});
 	if (!IsMouseButtonDown(0)) {
-		scrollbarData.mouseDown = false;
+		gScrollbarData.mouseDown = false;
 	}
 
-	if (IsMouseButtonDown(0) && !scrollbarData.mouseDown && Clay_PointerOver(Clay_GetElementId(CLAY_STRING("ScrollBar")))) {
+	if (IsMouseButtonDown(0) && !gScrollbarData.mouseDown && Clay_PointerOver(Clay_GetElementId(CLAY_STRING("ScrollBar")))) {
 		const Clay_ScrollContainerData scrollContainerData = Clay_GetScrollContainerData(Clay_GetElementId(CLAY_STRING("MainContent")));
-		scrollbarData.clickOrigin = mousePosition;
-		scrollbarData.positionOrigin = *scrollContainerData.scrollPosition;
-		scrollbarData.mouseDown = true;
+		gScrollbarData.clickOrigin = mousePosition;
+		gScrollbarData.positionOrigin = *scrollContainerData.scrollPosition;
+		gScrollbarData.mouseDown = true;
 	}
-	else if (scrollbarData.mouseDown) {
+	else if (gScrollbarData.mouseDown) {
 		const Clay_ScrollContainerData scrollContainerData = Clay_GetScrollContainerData(Clay_GetElementId(CLAY_STRING("MainContent")));
 		if (scrollContainerData.contentDimensions.height > 0) {
 			const Clay_Vector2 ratio = (Clay_Vector2){
@@ -215,10 +226,10 @@ void UpdateDrawFrame(Font* fonts) {
 				scrollContainerData.contentDimensions.height / scrollContainerData.scrollContainerDimensions.height,
 			};
 			if (scrollContainerData.config.vertical) {
-				scrollContainerData.scrollPosition->y = scrollbarData.positionOrigin.y + (scrollbarData.clickOrigin.y - mousePosition.y) * ratio.y;
+				scrollContainerData.scrollPosition->y = gScrollbarData.positionOrigin.y + (gScrollbarData.clickOrigin.y - mousePosition.y) * ratio.y;
 			}
 			if (scrollContainerData.config.horizontal) {
-				scrollContainerData.scrollPosition->x = scrollbarData.positionOrigin.x + (scrollbarData.clickOrigin.x - mousePosition.x) * ratio.x;
+				scrollContainerData.scrollPosition->x = gScrollbarData.positionOrigin.x + (gScrollbarData.clickOrigin.x - mousePosition.x) * ratio.x;
 			}
 		}
 	}
@@ -232,55 +243,50 @@ void UpdateDrawFrame(Font* fonts) {
 	EndDrawing();
 }
 
-bool reinitializeClay = false;
-
-void HandleClayErrors(const Clay_ErrorData errorData) {
-	printf("%s", errorData.errorText.chars);
-	if (errorData.errorType == CLAY_ERROR_TYPE_ELEMENTS_CAPACITY_EXCEEDED) {
-		reinitializeClay = true;
-		Clay_SetMaxElementCount(Clay_GetMaxElementCount() * 2);
-	}
-	else if (errorData.errorType == CLAY_ERROR_TYPE_TEXT_MEASUREMENT_CAPACITY_EXCEEDED) {
-		reinitializeClay = true;
-		Clay_SetMaxMeasureTextCacheWordCount(Clay_GetMaxMeasureTextCacheWordCount() * 2);
-	}
-}
-
 int BF_Main(void) {
-	uint64_t totalMemorySize = Clay_MinMemorySize();
-	Clay_Arena clayMemory = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, BC_Malloc(totalMemorySize));
 
-	Clay_Initialize(clayMemory, (Clay_Dimensions){(float)GetScreenWidth(), (float)GetScreenHeight()}, (Clay_ErrorHandler){HandleClayErrors, 0});
-	ClayRay_Initialize(1024, 768, "Clay - Raylib Renderer Example", FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
-	profilePicture = LoadTexture("resources/profile-picture.png");
+	// ==================================
+	// Clay Initialization
+	uint64_t vClayMinSize = Clay_MinMemorySize();
+	Clay_Arena vClayMemory = Clay_CreateArenaWithCapacityAndMemory(vClayMinSize, BC_Malloc(vClayMinSize));
+	Clay_Initialize(vClayMemory, (Clay_Dimensions){(float)GetScreenWidth(), (float)GetScreenHeight()}, (Clay_ErrorHandler){HandleClayErrors, 0});
 
-	Font fonts[2];
-	fonts[FONT_ID_BODY_24] = LoadFontEx("resources/Roboto-Regular.ttf", 48, NULL, 400);
-	SetTextureFilter(fonts[FONT_ID_BODY_24].texture, TEXTURE_FILTER_BILINEAR);
-	fonts[FONT_ID_BODY_16] = LoadFontEx("resources/Roboto-Regular.ttf", 32, NULL, 400);
-	SetTextureFilter(fonts[FONT_ID_BODY_16].texture, TEXTURE_FILTER_BILINEAR);
-	Clay_SetMeasureTextFunction(ClayRay_MeasureText, fonts);
+	// ==================================
+	// Raylib Initialization
+	SetTraceLogLevel(100);
+	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
+	InitWindow(1024, 768, "Clay - Raylib Renderer Example");
 
-	//--------------------------------------------------------------------------------------
 
-	Clay_SetDebugModeEnabled(true);
+	// ==================================
+	// Load resources
+	gProfilePicture = LoadTexture("resources/profile-picture.png");
+	gFonts[FONT_ID_BODY_24] = LoadFontEx("resources/Roboto-Regular.ttf", 48, NULL, 400);
+	SetTextureFilter(gFonts[FONT_ID_BODY_24].texture, TEXTURE_FILTER_BILINEAR);
+	gFonts[FONT_ID_BODY_16] = LoadFontEx("resources/Roboto-Regular.ttf", 32, NULL, 400);
+	SetTextureFilter(gFonts[FONT_ID_BODY_16].texture, TEXTURE_FILTER_BILINEAR);
+	Clay_SetMeasureTextFunction(ClayRay_MeasureText, gFonts);
 
+	// ==================================
+	// Main loop
 	while (!WindowShouldClose()) {
-		if (reinitializeClay) {
+		if (gReinitializeClay) {
 			Clay_SetMaxElementCount(8192);
-			totalMemorySize = Clay_MinMemorySize();
-			clayMemory = Clay_CreateArenaWithCapacityAndMemory(totalMemorySize, BC_Malloc(totalMemorySize));
-			Clay_Initialize(clayMemory, (Clay_Dimensions){(float)GetScreenWidth(), (float)GetScreenHeight()}, (Clay_ErrorHandler){HandleClayErrors, 0});
-			reinitializeClay = false;
+			vClayMinSize = Clay_MinMemorySize();
+			vClayMemory = Clay_CreateArenaWithCapacityAndMemory(vClayMinSize, BC_Malloc(vClayMinSize));
+			Clay_Initialize(vClayMemory, (Clay_Dimensions){(float)GetScreenWidth(), (float)GetScreenHeight()}, (Clay_ErrorHandler){HandleClayErrors, 0});
+			gReinitializeClay = false;
 		}
-		UpdateDrawFrame(fonts);
+		UpdateDrawFrame(gFonts);
 	}
 
-	UnloadTexture(profilePicture);
-	UnloadFont(fonts[FONT_ID_BODY_24]);
-	UnloadFont(fonts[FONT_ID_BODY_16]);
-	BC_Free(clayMemory.memory);
-	ClayRay_Close();
+	// ==================================
+	// Cleanup
+	UnloadTexture(gProfilePicture);
+	UnloadFont(gFonts[FONT_ID_BODY_24]);
+	UnloadFont(gFonts[FONT_ID_BODY_16]);
+	BC_Free(vClayMemory.memory);
+	ClayRay_Cleanup();
 
 	return 0;
 }

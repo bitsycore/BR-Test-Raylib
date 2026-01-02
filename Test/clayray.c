@@ -134,11 +134,6 @@ Clay_Dimensions ClayRay_MeasureText(const Clay_StringSlice text, Clay_TextElemen
 	return textSize;
 }
 
-void ClayRay_Initialize(const int width, const int height, const char* title, const unsigned int flags) {
-	SetConfigFlags(flags);
-	InitWindow(width, height, title);
-}
-
 void ClayRay_Render(Clay_RenderCommandArray renderCommands, const Font* fonts) {
 	for (int j = 0; j < renderCommands.length; j++) {
 		const Clay_RenderCommand* renderCommand = Clay_RenderCommandArray_Get(&renderCommands, j);
@@ -269,7 +264,7 @@ void ClayRay_Render(Clay_RenderCommandArray renderCommands, const Font* fonts) {
 	}
 }
 
-void ClayRay_Close() {
+void ClayRay_Cleanup() {
 	if (temp_render_buffer) BC_Free(temp_render_buffer);
 	temp_render_buffer = NULL;
 	temp_render_buffer_len = 0;
