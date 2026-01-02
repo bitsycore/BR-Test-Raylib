@@ -8,12 +8,25 @@ set(FETCHCONTENT_QUIET FALSE)
 if (CMAKE_CXX_COMPILER)
 endif ()
 
-set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
+# =============================
+# MARK: Backend Selection
+# =============================
 
-set(ENABLE_SDL_BACKEND OFF)
+#set(BACKEND "SDL2")
+set(BACKEND "SDL3")
+#set(BACKEND "Desktop")
+#set(BACKEND "RGFW")
 
-if (ENABLE_SDL_BACKEND)
+if (BACKEND STREQUAL "SDL3")
+    set(PLATFORM "SDL" CACHE STRING "" FORCE)
+    FetchContent_Declare(
+            SDL3
+            GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git"
+            GIT_TAG "main"
+            GIT_PROGRESS TRUE
+    )
+    FetchContent_MakeAvailable(SDL3)
+elseif (BACKEND STREQUAL "SDL2")
     set(PLATFORM "SDL" CACHE STRING "" FORCE)
     FetchContent_Declare(
             SDL2
@@ -22,9 +35,18 @@ if (ENABLE_SDL_BACKEND)
             GIT_PROGRESS TRUE
     )
     FetchContent_MakeAvailable(SDL2)
+elseif (BACKEND STREQUAL "RGFW")
+    set(PLATFORM "RGFW" CACHE STRING "" FORCE)
 else ()
     set(PLATFORM "Desktop" CACHE STRING "" FORCE)
 endif ()
+
+# =============================
+# MARK: Fetch Raylib
+# =============================
+
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
         raylib
@@ -33,8 +55,26 @@ FetchContent_Declare(
         GIT_PROGRESS TRUE
 )
 
-
 FetchContent_MakeAvailable(raylib)
+
+# =============================
+# MARK: RGFW Linking
+# =============================
+
+if (BACKEND STREQUAL "RGFW")
+   if(APPLE)
+        target_link_libraries(raylib PRIVATE
+                "-framework CoreFoundation"
+                "-framework Cocoa"
+                "-framework IOKit"
+                "-lobjc"
+        )
+    endif()
+endif ()
+
+# =============================
+# MARK: Custom Memory Allocators
+# =============================
 
 target_include_directories(raylib PRIVATE ${BCore_SOURCE_DIR})
 
