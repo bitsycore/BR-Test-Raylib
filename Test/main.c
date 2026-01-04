@@ -3,9 +3,8 @@
 
 #define CLAY_IMPLEMENTATION
 #include "3rdparty/clay.h"
-#include "3rdparty/clayray.h"
+#include "renderer/raylib/clayray.h"
 
-#include "raylib.h"
 #include "ResourcesLoad.h"
 
 #include "BCore/Memory/BC_Memory.h"

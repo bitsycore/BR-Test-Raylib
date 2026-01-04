@@ -8,6 +8,5 @@ endif ()
 
 add_subdirectory(../BRuntime/BCore ${CMAKE_BINARY_DIR}/BCore)
 add_subdirectory(../BRuntime/BFramework ${CMAKE_BINARY_DIR}/BFramework)
-add_subdirectory(Raylib)
 
 add_subdirectory(Test)

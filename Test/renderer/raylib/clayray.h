@@ -1,8 +1,8 @@
 #ifndef BR_TEST_RAYLIB_CLAY_RENDERER_RAYLIB_H
 #define BR_TEST_RAYLIB_CLAY_RENDERER_RAYLIB_H
 
-#include "clay.h"
 #include "raylib.h"
+#include "../../3rdparty/clay.h"
 
 typedef enum CustomLayoutElementType {
 	CUSTOM_LAYOUT_ELEMENT_TYPE_3D_MODEL

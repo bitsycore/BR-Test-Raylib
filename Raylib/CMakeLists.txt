@@ -19,13 +19,7 @@ set(BACKEND "SDL3")
 
 if (BACKEND STREQUAL "SDL3")
     set(PLATFORM "SDL" CACHE STRING "" FORCE)
-    FetchContent_Declare(
-            SDL3
-            GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git"
-            GIT_TAG "main"
-            GIT_PROGRESS TRUE
-    )
-    FetchContent_MakeAvailable(SDL3)
+	add_subdirectory(../SDL3 ${CMAKE_BINARY_DIR}/SDL3)
 elseif (BACKEND STREQUAL "SDL2")
     set(PLATFORM "SDL" CACHE STRING "" FORCE)
     FetchContent_Declare(
