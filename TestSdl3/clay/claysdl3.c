@@ -1,13 +1,11 @@
+#include "claysdl3.h"
+
+#define CLAY_IMPLEMENTATION
+#include "clay.h"
+
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
-#include "../../3rdparty/clay.h"
-
-typedef struct {
-    SDL_Renderer *renderer;
-    TTF_TextEngine *textEngine;
-    TTF_Font **fonts;
-} Clay_SDL3RendererData;
 
 /* Global for convenience. Even in 4K this is enough for smooth curves (low radius or rect size coupled with
  * no AA or low resolution might make it appear as jagged curves) */
@@ -142,7 +140,7 @@ static void SDL_Clay_RenderArc(Clay_SDL3RendererData *rendererData, const SDL_FP
 
 SDL_Rect currentClippingRectangle;
 
-static void SDL_Clay_RenderClayCommands(Clay_SDL3RendererData *rendererData, Clay_RenderCommandArray *rcommands)
+void SDL_Clay_RenderClayCommands(Clay_SDL3RendererData *rendererData, Clay_RenderCommandArray *rcommands)
 {
     for (size_t i = 0; i < rcommands->length; i++) {
         Clay_RenderCommand *rcmd = Clay_RenderCommandArray_Get(rcommands, i);

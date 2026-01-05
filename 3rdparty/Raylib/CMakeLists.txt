@@ -13,13 +13,15 @@ endif ()
 # =============================
 
 #set(BACKEND "SDL2")
-set(BACKEND "SDL3")
-#set(BACKEND "Desktop")
+#set(BACKEND "SDL3")
+set(BACKEND "Desktop")
 #set(BACKEND "RGFW")
 
 if (BACKEND STREQUAL "SDL3")
     set(PLATFORM "SDL" CACHE STRING "" FORCE)
-	add_subdirectory(../SDL3 ${CMAKE_BINARY_DIR}/SDL3)
+	if(EXISTS "${CMAKE_SOURCE_DIR}/../SDL3")
+		add_subdirectory(../SDL3 ${CMAKE_BINARY_DIR}/SDL3)
+	endif()
 elseif (BACKEND STREQUAL "SDL2")
     set(PLATFORM "SDL" CACHE STRING "" FORCE)
     FetchContent_Declare(
