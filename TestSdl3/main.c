@@ -1,11 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
 #define SDL_MAIN_USE_CALLBACKS
 #include <SDL3/SDL_main.h>
+
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include <SDL3_ttf/SDL_ttf.h>
+
 #include "clay/claysdl3.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 
 static const Uint32 FONT_ID = 0;
 
@@ -375,8 +377,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
 
     state->rendererData.fonts[FONT_ID] = font;
-
-    sample_image = IMG_LoadTexture(state->rendererData.renderer, R"(C:\Dev\C\BR-Test-Raylib\cmake-build-debug-mingw\_deps\sdl3_image-src\external\libtiff\doc\images\smallliz.jpg)");
+	SDL_Surface* surface = SDL_LoadPNG(R"(C:\Dev\C\BR-Test-Raylib\cmake-build-debug-clang-msvc\_deps\sdl3_image-src\external\libjxl\testdata\external\wesaturate\500px\tmshre_riaphotographs_srgb8.png)");
+    sample_image = SDL_CreateTextureFromSurface(state->rendererData.renderer, surface);
+	SDL_DestroySurface(surface);
     if (!sample_image) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load image: %s", SDL_GetError());
         return SDL_APP_FAILURE;
