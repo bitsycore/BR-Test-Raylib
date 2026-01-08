@@ -370,14 +370,14 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
-    TTF_Font *font = TTF_OpenFont("C:\\Windows\\Fonts\\arial.ttf", 24);
+    TTF_Font *font = TTF_OpenFont("Resources/Roboto-Regular.ttf", 24);
     if (!font) {
         SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Failed to load font: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
 
     state->rendererData.fonts[FONT_ID] = font;
-	SDL_Surface* surface = SDL_LoadPNG(R"(C:\Dev\C\BR-Test-Raylib\cmake-build-debug-clang-msvc\_deps\sdl3_image-src\external\libjxl\testdata\external\wesaturate\500px\tmshre_riaphotographs_srgb8.png)");
+	SDL_Surface* surface = SDL_LoadPNG("Resources/profile-picture.png");
     sample_image = SDL_CreateTextureFromSurface(state->rendererData.renderer, surface);
 	SDL_DestroySurface(surface);
     if (!sample_image) {

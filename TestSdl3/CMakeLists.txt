@@ -18,9 +18,18 @@ target_link_libraries(TestSdl3
 		PRIVATE
 		SDL3::SDL3
 		SDL3_ttf::SDL3_ttf
+		BFramework
 )
 
 add_custom_command(TARGET TestSdl3 POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SDL3_BINARY_DIR}/SDL3.dll" $<TARGET_FILE_DIR:TestSdl3>
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SDL3_ttf_BINARY_DIR}/SDL3_ttf.dll" $<TARGET_FILE_DIR:TestSdl3>
+)
+
+set(RESOURCE_DIR "../../Resources")
+
+add_custom_command(TARGET TestSdl3 POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${RESOURCE_DIR}"
+		"$<TARGET_FILE_DIR:TestSdl3>/Resources"
 )

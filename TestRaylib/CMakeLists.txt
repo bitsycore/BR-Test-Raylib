@@ -31,12 +31,12 @@ target_link_libraries(TestRaylib
 		raylib
 )
 
-set(RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources")
+set(RESOURCE_DIR "../Resources")
 
 add_custom_command(TARGET TestRaylib POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 		"${RESOURCE_DIR}"
-		"$<TARGET_FILE_DIR:TestRaylib>/resources"
+		"$<TARGET_FILE_DIR:TestRaylib>/Resources"
 )
 
 add_custom_command(TARGET TestRaylib POST_BUILD
