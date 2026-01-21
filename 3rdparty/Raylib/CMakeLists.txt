@@ -74,6 +74,10 @@ endif ()
 
 target_include_directories(raylib PRIVATE ${BCore_SOURCE_DIR})
 
+target_link_libraries(raylib PRIVATE
+        BFramework
+)
+
 if (MSVC)
     target_compile_options(raylib PRIVATE "/FI${BCore_SOURCE_DIR}/Memory/BC_Memory.h")
 else ()

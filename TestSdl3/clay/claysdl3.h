@@ -10,4 +10,4 @@ typedef struct {
 	TTF_Font **fonts;
 } Clay_SDL3RendererData;
 
-void SDL_Clay_RenderClayCommands(Clay_SDL3RendererData *rendererData, Clay_RenderCommandArray *rcommands);
+void SDL_Clay_RenderClayCommands(Clay_SDL3RendererData *rendererData, Clay_RenderCommandArray *renderCommands);

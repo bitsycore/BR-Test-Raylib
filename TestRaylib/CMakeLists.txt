@@ -27,8 +27,8 @@ add_executable(TestRaylib
 
 target_link_libraries(TestRaylib
 		PRIVATE
-		BFramework
 		raylib
+		BFramework
 )
 
 set(RESOURCE_DIR "../Resources")
